@@ -172,6 +172,11 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 			dc.Point = GenerateGuardPosition(point)
 
 		}
+
+		speed.X = 0
+		speed.Y = 0
+		speed.Acceleration.X = 0
+		speed.Acceleration.Y = 0
 	}
 
 }
