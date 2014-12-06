@@ -4,6 +4,7 @@ import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/messages"
+	"log"
 	"math/rand"
 )
 
@@ -123,8 +124,8 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 				shadeLink.Entity.Exists = true
 				gai.progress[link.Entity.ID()] = false
 				link.Entity = nil
+				log.Println("WOOHOO")
 			}
-
 			dc.Point = GenerateGuardPosition(point)
 		} else {
 			dc.Point = GenerateGuardPosition(point)

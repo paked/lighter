@@ -3,7 +3,6 @@ package systems
 import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
-	"log"
 	"math"
 )
 
@@ -44,7 +43,8 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 			}
 
 			if isPointInCircle(oSpace.Position, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
-				log.Println("Hey")
+				// log.Println("Hey")
+				//Kill somewthing
 			}
 
 		}

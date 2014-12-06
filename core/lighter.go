@@ -44,7 +44,7 @@ func (l *Lighter) Setup() {
 		}
 	}
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 5; i++ {
 		g, s := NewGuardAndSite(nil)
 		l.AddEntity(g)
 		l.AddEntity(s)
