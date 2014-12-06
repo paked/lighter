@@ -4,7 +4,7 @@ import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
 	"log"
-	// "math"
+	"math"
 )
 
 const (
@@ -42,45 +42,15 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 			if !e.GetComponent(&space) || !entity.GetComponent(&oSpace) {
 				return
 			}
-			var v1, v2, v3 engi.Point
-			switch v.Direction {
-			case LOOKING_DOWN:
-				v1 = engi.Point{space.Position.X - 25, space.Position.Y}
-				v2 = engi.Point{space.Position.X, space.Position.Y + 50}
-				v3 = engi.Point{space.Position.X + 25, space.Position.Y}
-			case LOOKING_UP:
-				v1 = engi.Point{space.Position.X - 50, space.Position.Y}
-				v2 = engi.Point{space.Position.X, space.Position.Y - 50}
-				v3 = engi.Point{space.Position.X + 50, space.Position.Y}
-			case LOOKING_LEFT:
-				// v1 = engi.Point{space.Position.X, space.Position.Y - 50}
-				// v2 = engi.Point{space.Position.X - 50, space.Position.Y}
-				// v1 = engi.Point{space.Position.X, space.Position.Y + 50}
-			case LOOKING_RIGHT:
-				// v1 = engi.Point{space.Position.X, space.Position.Y - 50}
-				// v2 = engi.Point{space.Position.X + 50, space.Position.Y}
-				// v3 = engi.Point{space.Position.X, space.Position.Y + 50}
+
+			if isPointInCircle(oSpace.Position, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
+				log.Println("Hey")
 			}
 
-			log.Println(IsPointInTriangle(oSpace.Position, v1, v2, v3), entity.Pattern)
-			// log.Println(canSee(space, oSpace))
 		}
 	}
 }
 
-// func canSee(base *engi.SpaceComponent, other *engi.SpaceComponent) bool {
-
-// }
-
-func IsPointInTriangle(point, v1, v2, v3 engi.Point) bool {
-	var b1, b2, b3 bool
-	b1 = sign(point, v1, v2) < 0
-	b1 = sign(point, v2, v3) < 0
-	b1 = sign(point, v3, v1) < 0
-
-	return (b1 == b2) && b2 == b3
-}
-
-func sign(v1, v2, v3 engi.Point) float32 {
-	return (v1.X-v3.X)*(v2.Y-v3.Y) - (v2.X-v3.X)*(v1.Y-v3.Y)
+func isPointInCircle(point engi.Point, center engi.Point, radius float32) bool {
+	return math.Pow(float64(point.X-center.X), 2)+math.Pow(float64(point.Y-center.Y), 2) < math.Pow(float64(radius), 2)
 }

@@ -19,6 +19,7 @@ func (l Lighter) Preload() {
 	engi.Files.Add("shade", "assets/shade.png")
 	engi.Files.Add("guard", "assets/enemy.png")
 	engi.Files.Add("key", "assets/key.png")
+	engi.Files.Add("sight", "assets/sight.png")
 }
 
 func (l *Lighter) Setup() {
@@ -31,6 +32,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.GuardAISystem{})
 	l.AddSystem(&systems.KeySystem{})
 	l.AddSystem(&systems.VisionSystem{})
+	l.AddSystem(&systems.StickySystem{})
 
 	l.AddEntity(NewPlayer())
 
@@ -43,7 +45,9 @@ func (l *Lighter) Setup() {
 	}
 
 	for i := 0; i < 1; i++ {
-		l.AddEntity(NewGuard(nil))
+		g, s := NewGuardAndSite(nil)
+		l.AddEntity(g)
+		l.AddEntity(s)
 	}
 
 	l.AddEntity(NewKey())
@@ -103,7 +107,7 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	return light, shade
 }
 
-func NewGuard(target *engi.Entity) *engi.Entity {
+func NewGuardAndSite(target *engi.Entity) (*engi.Entity, *engi.Entity) {
 	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem", "VisionSystem"})
 	guard.Pattern = "guard"
 	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
@@ -116,7 +120,16 @@ func NewGuard(target *engi.Entity) *engi.Entity {
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
 	guard.AddComponent(&vision)
-	return guard
+
+	sight := engi.NewEntity([]string{"RenderSystem", "StickySystem"})
+	sight.Pattern = "sight"
+	renderS := engi.NewRenderComponent(engi.Files.Image("sight"), engi.Point{2, 2}, "sight")
+	spaceS := engi.SpaceComponent{Position: space.Position, Width: 64 * render.Scale.X, Height: 64 * render.Scale.Y}
+	linkS := engi.LinkComponent{guard}
+	sight.AddComponent(&renderS)
+	sight.AddComponent(&spaceS)
+	sight.AddComponent(&linkS)
+	return guard, sight
 }
 
 func NewKey() *engi.Entity {
