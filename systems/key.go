@@ -3,6 +3,7 @@ package systems
 import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
+	"log"
 )
 
 type KeySystem struct {
@@ -33,9 +34,12 @@ func (ks KeySystem) Receive(message engi.Message) {
 	if !cm.Entity.GetComponent(&control) || !cm.To.GetComponent(&link) || !cm.Entity.GetComponent(&key) {
 		return
 	}
-
-	link.Entity = cm.Entity
-	key.HasKey = true
+	if cm.Entity.Pattern == "player" && cm.To.Pattern == "key" && !key.HasKey {
+		// log.Println(cm.Entity.Pattern, cm.To.Pattern)
+		link.Entity = cm.Entity
+		key.HasKey = true
+		log.Println("Now haz key")
+	}
 	// oKey.HasKey = true
 }
 
