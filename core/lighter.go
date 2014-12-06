@@ -97,9 +97,11 @@ func NewGuard(target *engi.Entity) *engi.Entity {
 	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem"})
 	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
 	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
+	destination := components.DestinationComponent{}
 	link := engi.LinkComponent{target}
 	guard.AddComponent(&render)
 	guard.AddComponent(&space)
 	guard.AddComponent(&link)
+	guard.AddComponent(&destination)
 	return guard
 }

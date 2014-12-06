@@ -2,7 +2,9 @@ package systems
 
 import (
 	"github.com/paked/engi"
+	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/messages"
+	"math/rand"
 )
 
 const (
@@ -59,47 +61,64 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		return
 	}
 
+	point := engi.Point{}
+
 	if link.Entity == nil {
-		return
+		var dc *components.DestinationComponent
+		if !e.GetComponent(&dc) {
+			return
+		}
+
+		point = dc.Point
+	} else {
+		if link.Entity.GetComponent(&targetSpace) {
+			point = targetSpace.Position
+		}
 	}
 
-	if !link.Entity.GetComponent(&targetSpace) {
-		return
-	}
-
-	vel := 100 * dt
+	vel := 150 * dt
 	done := true
-	if space.Position.X < (targetSpace.Position.X - 5) {
+	if space.Position.X < (point.X - 5) {
 		space.Position.X += vel
 		done = false
 	}
 
-	if space.Position.X > (targetSpace.Position.X + 5) {
+	if space.Position.X > (point.X + 5) {
 		space.Position.X -= vel
 		done = false
 	}
 
-	if space.Position.Y < (targetSpace.Position.Y - 5) {
+	if space.Position.Y < (point.Y - 5) {
 		space.Position.Y += vel
 		done = false
 	}
 
-	if space.Position.Y > (targetSpace.Position.Y + 5) {
+	if space.Position.Y > (point.Y + 5) {
 		space.Position.Y -= vel
 		done = false
 	}
 
 	if done {
-		var shadeLink *engi.LinkComponent
-		if !link.Entity.GetComponent(&shadeLink) {
-			return
+		if link.Entity != nil {
+			var shadeLink *engi.LinkComponent
+			if !link.Entity.GetComponent(&shadeLink) {
+				return
+			}
+
+			if !shadeLink.Entity.Exists {
+				shadeLink.Entity.Exists = true
+				gai.progress[link.Entity.ID()] = false
+				link.Entity = nil
+			}
+		} else {
+			var dc *components.DestinationComponent
+			if !e.GetComponent(&dc) {
+				return
+			}
+
+			dc.Point = engi.Point{engi.Width() * rand.Float32(), engi.Height() * rand.Float32()}
 		}
 
-		if !shadeLink.Entity.Exists {
-			shadeLink.Entity.Exists = true
-			gai.progress[link.Entity.ID()] = false
-			link.Entity = nil
-		}
 	}
 
 }
