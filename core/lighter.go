@@ -16,6 +16,7 @@ type Lighter struct {
 func (l Lighter) Preload() {
 	engi.Files.Add("player", "assets/player.png")
 	engi.Files.Add("lightsource", "assets/lightsource.png")
+	engi.Files.Add("shade", "assets/shade.png")
 }
 
 func (l *Lighter) Setup() {
@@ -24,12 +25,15 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&engi.RenderSystem{})
 	l.AddSystem(&systems.ControlSystem{})
 	l.AddSystem(&engi.CollisionSystem{})
+	l.AddSystem(&systems.LightSystem{})
 
 	l.AddEntity(NewPlayer())
 
-	for x := float32(0); x < 1; x += .3333 {
-		for y := float32(0); y < 1; y += .3333 {
-			l.AddEntity(NewLight(x*engi.Width(), y*engi.Height()))
+	for x := float32(0); x < 1; x += .25 {
+		for y := float32(0); y < 1; y += .25 {
+			li, sh := NewLightAndShade(x*engi.Width()+64, y*engi.Height()+64)
+			l.AddEntity(li)
+			l.AddEntity(sh)
 		}
 
 	}
@@ -52,8 +56,37 @@ func NewPlayer() *engi.Entity {
 	return player
 }
 
+func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
+	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "LightSystem"})
+	render := engi.NewRenderComponent(engi.Files.Image("lightsource"), engi.Point{2, 2}, "light")
+
+	offset := engi.Point{rand.Float32() * (engi.Width() / 20), rand.Float32() * (engi.Height() / 20)}
+	if rand.Float32() > .5 {
+		offset.X *= -1
+	}
+
+	if rand.Float32() > .5 {
+		offset.Y *= -1
+	}
+	space := engi.SpaceComponent{Position: engi.Point{x + offset.X, y + offset.Y}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
+	collision := engi.CollisionComponent{Main: false, Extra: engi.Point{100, 100}, Solid: false}
+	light.AddComponent(&render)
+	light.AddComponent(&space)
+	light.AddComponent(&collision)
+
+	shade := engi.NewEntity([]string{"RenderSystem"})
+	texture := engi.Files.Image("shade")
+	shadeRender := engi.NewRenderComponent(texture, engi.Point{1, 1}, "shade")
+	shadeSpace := engi.SpaceComponent{Position: engi.Point{(space.Position.X + space.Width/2) - (texture.Width() / 2), (space.Position.Y + space.Height/2) - (texture.Height() / 2)}, Width: texture.Width(), Height: texture.Height()}
+
+	shade.AddComponent(&shadeRender)
+	shade.AddComponent(&shadeSpace)
+
+	return light, shade
+}
+
 func NewLight(x, y float32) *engi.Entity {
-	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
+	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "LightSystem"})
 	render := engi.NewRenderComponent(engi.Files.Image("lightsource"), engi.Point{2, 2}, "light")
 
 	offset := engi.Point{rand.Float32() * (engi.Width() / 15), rand.Float32() * (engi.Height() / 15)}
@@ -65,7 +98,7 @@ func NewLight(x, y float32) *engi.Entity {
 		offset.Y *= -1
 	}
 	space := engi.SpaceComponent{Position: engi.Point{x + offset.X, y + offset.Y}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
-	collision := engi.CollisionComponent{Main: true, Extra: engi.Point{200, 100}, Solid: false}
+	collision := engi.CollisionComponent{Main: false, Extra: engi.Point{50, 50}, Solid: false}
 	light.AddComponent(&render)
 	light.AddComponent(&space)
 	light.AddComponent(&collision)
