@@ -99,6 +99,11 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 	}
 
 	if done {
+		var dc *components.DestinationComponent
+		if !e.GetComponent(&dc) {
+			return
+		}
+
 		if link.Entity != nil {
 			var shadeLink *engi.LinkComponent
 			if !link.Entity.GetComponent(&shadeLink) {
@@ -110,21 +115,24 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 				gai.progress[link.Entity.ID()] = false
 				link.Entity = nil
 			}
-		} else {
-			var dc *components.DestinationComponent
-			if !e.GetComponent(&dc) {
-				return
-			}
-			old := dc.Point
-			dc.Point = engi.Point{engi.Width() * rand.Float32(), engi.Height() * rand.Float32()}
 
-			if rand.Float32() > .5 {
-				dc.X = old.X
-			} else {
-				dc.Y = old.Y
-			}
+			dc.Point = GenerateGuardPosition(point)
+		} else {
+			dc.Point = GenerateGuardPosition(point)
+
 		}
 
 	}
 
+}
+
+func GenerateGuardPosition(old engi.Point) engi.Point {
+	point := engi.Point{engi.Width() * rand.Float32(), engi.Height() * rand.Float32()}
+
+	if rand.Float32() > .5 {
+		point.X = old.X
+	} else {
+		point.Y = old.Y
+	}
+	return point
 }
