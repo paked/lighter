@@ -76,7 +76,7 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		}
 	}
 
-	vel := 300 * dt
+	vel := 50 * dt
 	done := true
 	if space.Position.X < (point.X - 5) {
 		space.Position.X += vel

@@ -18,6 +18,7 @@ func (l Lighter) Preload() {
 	engi.Files.Add("lightsource", "assets/lightsource.png")
 	engi.Files.Add("shade", "assets/shade.png")
 	engi.Files.Add("guard", "assets/enemy.png")
+	engi.Files.Add("key", "assets/key.png")
 }
 
 func (l *Lighter) Setup() {
@@ -28,6 +29,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&engi.CollisionSystem{})
 	l.AddSystem(&systems.LightSystem{})
 	l.AddSystem(&systems.GuardAISystem{})
+	l.AddSystem(&systems.KeySystem{})
 
 	l.AddEntity(NewPlayer())
 
@@ -42,27 +44,33 @@ func (l *Lighter) Setup() {
 	for i := 0; i < 5; i++ {
 		l.AddEntity(NewGuard(nil))
 	}
+
+	l.AddEntity(NewKey())
 }
 
 func NewPlayer() *engi.Entity {
 	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem"})
+	player.Pattern = "player"
 	render := engi.NewRenderComponent(engi.Files.Image("player"), engi.Point{2, 2}, "player")
 	space := engi.SpaceComponent{Position: engi.Point{400, 400}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	control := components.ControlComponent{Scheme: systems.CONTROL_SCHEME_WASD}
 	speed := components.SpeedComponent{}
 	collision := engi.CollisionComponent{Main: true, Extra: engi.Point{}, Solid: true}
+	key := components.KeyComponent{}
 
 	player.AddComponent(&render)
 	player.AddComponent(&space)
 	player.AddComponent(&control)
 	player.AddComponent(&speed)
 	player.AddComponent(&collision)
+	player.AddComponent(&key)
 
 	return player
 }
 
 func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "LightSystem"})
+	light.Pattern = "light"
 	render := engi.NewRenderComponent(engi.Files.Image("lightsource"), engi.Point{2, 2}, "light")
 
 	offset := engi.Point{rand.Float32() * (engi.Width() / 20), rand.Float32() * (engi.Height() / 20)}
@@ -81,6 +89,7 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	light.AddComponent(&collision)
 
 	shade := engi.NewEntity([]string{"RenderSystem"})
+	shade.Pattern = "shade"
 	texture := engi.Files.Image("shade")
 	shadeRender := engi.NewRenderComponent(texture, engi.Point{1, 1}, "shade")
 	shadeSpace := engi.SpaceComponent{Position: engi.Point{(space.Position.X + space.Width/2) - (texture.Width() / 2), (space.Position.Y + space.Height/2) - (texture.Height() / 2)}, Width: texture.Width(), Height: texture.Height()}
@@ -95,6 +104,7 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 
 func NewGuard(target *engi.Entity) *engi.Entity {
 	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem"})
+	guard.Pattern = "guard"
 	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
 	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	destination := components.DestinationComponent{}
@@ -104,4 +114,21 @@ func NewGuard(target *engi.Entity) *engi.Entity {
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
 	return guard
+}
+
+func NewKey() *engi.Entity {
+	key := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "KeySystem"})
+	key.Pattern = "key"
+	render := engi.NewRenderComponent(engi.Files.Image("key"), engi.Point{2, 2}, "guard")
+	space := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
+	link := engi.LinkComponent{}
+	collision := engi.CollisionComponent{}
+	// keyC := components.KeyComponent{}
+
+	key.AddComponent(&render)
+	key.AddComponent(&space)
+	key.AddComponent(&link)
+	// key.AddComponent(&keyC)
+	key.AddComponent(&collision)
+	return key
 }

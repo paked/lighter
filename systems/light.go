@@ -2,8 +2,9 @@ package systems
 
 import (
 	"github.com/paked/engi"
+	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/messages"
-	// "log"
+	"log"
 )
 
 type LightSystem struct {
@@ -20,7 +21,27 @@ func (ls *LightSystem) New() {
 }
 
 func (ls *LightSystem) Receive(message engi.Message) {
-
+	switch message.(type) {
+	case engi.CollisionMessage:
+		cm := message.(engi.CollisionMessage)
+		var (
+			link     *engi.LinkComponent
+			controls *components.ControlComponent
+			key      *components.KeyComponent
+		)
+		//Player and light
+		if !cm.Entity.GetComponent(&key) || !cm.Entity.GetComponent(&controls) || !cm.To.GetComponent(&link) {
+			return
+		}
+		log.Println(cm.Entity.Pattern, cm.To.Pattern)
+		if cm.Entity.Pattern == "player" && cm.To.Pattern == "light" {
+			if key.HasKey {
+				if link.Entity != nil && link.Entity.Pattern == "shade" {
+					link.Entity.Exists = false
+				}
+			}
+		}
+	}
 }
 
 func (ls *LightSystem) Update(e *engi.Entity, dt float32) {
