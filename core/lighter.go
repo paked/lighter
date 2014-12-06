@@ -17,6 +17,7 @@ func (l Lighter) Preload() {
 	engi.Files.Add("player", "assets/player.png")
 	engi.Files.Add("lightsource", "assets/lightsource.png")
 	engi.Files.Add("shade", "assets/shade.png")
+	engi.Files.Add("guard", "assets/enemy.png")
 }
 
 func (l *Lighter) Setup() {
@@ -36,6 +37,9 @@ func (l *Lighter) Setup() {
 			l.AddEntity(sh)
 		}
 
+	}
+	for i := 0; i <= 5; i++ {
+		l.AddEntity(NewGuard())
 	}
 }
 
@@ -68,8 +72,9 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	if rand.Float32() > .5 {
 		offset.Y *= -1
 	}
+
 	space := engi.SpaceComponent{Position: engi.Point{x + offset.X, y + offset.Y}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
-	collision := engi.CollisionComponent{Main: false, Extra: engi.Point{100, 100}, Solid: false}
+	collision := engi.CollisionComponent{Main: false, Solid: false}
 	light.AddComponent(&render)
 	light.AddComponent(&space)
 	light.AddComponent(&collision)
@@ -85,23 +90,12 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	return light, shade
 }
 
-func NewLight(x, y float32) *engi.Entity {
-	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "LightSystem"})
-	render := engi.NewRenderComponent(engi.Files.Image("lightsource"), engi.Point{2, 2}, "light")
+func NewGuard() *engi.Entity {
+	guard := engi.NewEntity([]string{"RenderSystem"})
+	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
+	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 
-	offset := engi.Point{rand.Float32() * (engi.Width() / 15), rand.Float32() * (engi.Height() / 15)}
-	if rand.Float32() > .5 {
-		offset.X *= -1
-	}
-
-	if rand.Float32() > .5 {
-		offset.Y *= -1
-	}
-	space := engi.SpaceComponent{Position: engi.Point{x + offset.X, y + offset.Y}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
-	collision := engi.CollisionComponent{Main: false, Extra: engi.Point{50, 50}, Solid: false}
-	light.AddComponent(&render)
-	light.AddComponent(&space)
-	light.AddComponent(&collision)
-
-	return light
+	guard.AddComponent(&render)
+	guard.AddComponent(&space)
+	return guard
 }
