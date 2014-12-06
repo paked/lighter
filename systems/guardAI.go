@@ -76,7 +76,7 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		}
 	}
 
-	vel := 150 * dt
+	vel := 300 * dt
 	done := true
 	if space.Position.X < (point.X - 5) {
 		space.Position.X += vel
@@ -115,8 +115,14 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 			if !e.GetComponent(&dc) {
 				return
 			}
-
+			old := dc.Point
 			dc.Point = engi.Point{engi.Width() * rand.Float32(), engi.Height() * rand.Float32()}
+
+			if rand.Float32() > .5 {
+				dc.X = old.X
+			} else {
+				dc.Y = old.Y
+			}
 		}
 
 	}
