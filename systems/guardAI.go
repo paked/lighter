@@ -78,30 +78,58 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 			point = targetSpace.Position
 		}
 	}
+	var speed *components.SpeedComponent
 
-	vel := 50 * dt
+	if !e.GetComponent(&speed) {
+		return
+	}
+	accel := 10 * dt
+	if link.Entity != nil {
+		if link.Entity.Pattern == "player" {
+			accel *= 1.2
+		}
+	}
+
+	drag := float32(.6)
 	done := true
 
 	if space.Position.X < (point.X - 5) {
-		space.Position.X += vel
+		speed.Acceleration.Y = 0
+		speed.Acceleration.X += accel
 		done = false
 	}
 
 	if space.Position.X > (point.X + 5) {
-		space.Position.X -= vel
+		speed.Acceleration.X -= accel
 		done = false
 	}
 
 	if done {
+		speed.Acceleration.X = 0
 		if space.Position.Y < (point.Y - 5) {
-			space.Position.Y += vel
+			speed.Acceleration.Y += accel
 			done = false
 		}
 
 		if space.Position.Y > (point.Y + 5) {
-			space.Position.Y -= vel
+			speed.Acceleration.Y -= accel
 			done = false
 		}
+	}
+
+	speed.X += speed.Acceleration.X
+	speed.Y += speed.Acceleration.Y
+	space.Position.X += speed.X
+	space.Position.Y += speed.Y
+	speed.X *= drag
+	speed.Y *= drag
+
+	if speed.X <= 1 && speed.X >= -1 {
+		speed.X = 0
+	}
+
+	if speed.Y <= 1 && speed.Y >= -1 {
+		speed.Y = 0
 	}
 
 	if done {

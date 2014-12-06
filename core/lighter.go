@@ -119,6 +119,7 @@ func NewGuardAndSite(target *engi.Entity) (*engi.Entity, *engi.Entity) {
 	guard.AddComponent(&space)
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
+	guard.AddComponent(&components.SpeedComponent{})
 
 	sight := engi.NewEntity([]string{"RenderSystem", "StickySystem", "AnimationSystem", "VisionSystem"})
 	sight.Pattern = "sight"
