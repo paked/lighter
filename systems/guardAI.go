@@ -5,8 +5,14 @@ import (
 	"github.com/paked/lighter/messages"
 )
 
+const (
+	PROGRESS_MOVING = 1
+	PROGRESS_NONE   = 0
+)
+
 type GuardAISystem struct {
 	*engi.System
+	progress map[string]bool
 }
 
 func (gai GuardAISystem) Name() string {
@@ -15,6 +21,7 @@ func (gai GuardAISystem) Name() string {
 
 func (gai *GuardAISystem) New() {
 	gai.System = &engi.System{}
+	gai.progress = make(map[string]bool)
 	engi.Mailbox.Listen("AttentionMessage", gai)
 }
 
@@ -22,6 +29,10 @@ func (gai *GuardAISystem) Receive(message engi.Message) {
 	switch message.(type) {
 	case messages.AttentionMessage:
 		attention := message.(messages.AttentionMessage)
+		if gai.progress[attention.Entity.ID()] {
+			return
+		}
+
 		for _, e := range gai.Entities() {
 			var link *engi.LinkComponent
 			if !e.GetComponent(&link) {
@@ -29,6 +40,7 @@ func (gai *GuardAISystem) Receive(message engi.Message) {
 			}
 
 			if link.Entity == nil {
+				gai.progress[attention.Entity.ID()] = true
 				link.Entity = attention.Entity
 				return
 			}
@@ -85,6 +97,7 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 
 		if !shadeLink.Entity.Exists {
 			shadeLink.Entity.Exists = true
+			gai.progress[link.Entity.ID()] = false
 			link.Entity = nil
 		}
 	}
