@@ -29,7 +29,7 @@ func (ls *LightSystem) Receive(message engi.Message) {
 			controls *components.ControlComponent
 			key      *components.KeyComponent
 		)
-		//Player and light
+
 		if !cm.Entity.GetComponent(&key) || !cm.Entity.GetComponent(&controls) || !cm.To.GetComponent(&link) {
 			return
 		}

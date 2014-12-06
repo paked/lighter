@@ -30,6 +30,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.LightSystem{})
 	l.AddSystem(&systems.GuardAISystem{})
 	l.AddSystem(&systems.KeySystem{})
+	l.AddSystem(&systems.VisionSystem{})
 
 	l.AddEntity(NewPlayer())
 
@@ -41,7 +42,7 @@ func (l *Lighter) Setup() {
 		}
 	}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 1; i++ {
 		l.AddEntity(NewGuard(nil))
 	}
 
@@ -49,7 +50,7 @@ func (l *Lighter) Setup() {
 }
 
 func NewPlayer() *engi.Entity {
-	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem"})
+	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "VisionSystem"})
 	player.Pattern = "player"
 	render := engi.NewRenderComponent(engi.Files.Image("player"), engi.Point{2, 2}, "player")
 	space := engi.SpaceComponent{Position: engi.Point{400, 400}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
@@ -103,16 +104,18 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 }
 
 func NewGuard(target *engi.Entity) *engi.Entity {
-	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem"})
+	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem", "VisionSystem"})
 	guard.Pattern = "guard"
 	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
 	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	destination := components.DestinationComponent{}
 	link := engi.LinkComponent{target}
+	vision := components.VisionComponent{true, 0}
 	guard.AddComponent(&render)
 	guard.AddComponent(&space)
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
+	guard.AddComponent(&vision)
 	return guard
 }
 
