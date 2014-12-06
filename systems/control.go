@@ -45,6 +45,10 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 		left = engi.Keys.KEY_LEFT.Down()
 	}
 	accel := 100 * dt
+	if engi.Keys.SHIFT.Down() {
+		accel /= 2
+	}
+
 	drag := float32(.7)
 
 	speed.Acceleration = engi.Point{}

@@ -90,7 +90,7 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		}
 	}
 
-	drag := float32(.6)
+	drag := float32(.4)
 	done := true
 
 	if space.Position.X < (point.X - 5) {
