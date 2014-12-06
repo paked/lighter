@@ -2,7 +2,7 @@ package systems
 
 import (
 	"github.com/paked/engi"
-	// "log"
+	"github.com/paked/lighter/messages"
 )
 
 type GuardAISystem struct {
@@ -18,7 +18,18 @@ func (gai *GuardAISystem) New() {
 }
 
 func (gai *GuardAISystem) Receive(message engi.Message) {
+	target, ok := message.(messages.TargetMessage)
 
+	if !ok {
+		return
+	}
+
+	var link *engi.LinkComponent
+	if !target.Guard.GetComponent(&link) {
+		return
+	}
+
+	link.Entity = target.Entity
 }
 
 func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
@@ -37,20 +48,35 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 	}
 
 	vel := 100 * dt
-
-	if space.Position.X < targetSpace.Position.X {
+	done := true
+	if space.Position.X < (targetSpace.Position.X - 5) {
 		space.Position.X += vel
+		done = false
 	}
 
-	if space.Position.X > targetSpace.Position.X {
+	if space.Position.X > (targetSpace.Position.X + 5) {
 		space.Position.X -= vel
+		done = false
 	}
 
-	if space.Position.Y < targetSpace.Position.Y {
+	if space.Position.Y < (targetSpace.Position.Y - 5) {
 		space.Position.Y += vel
+		done = false
 	}
 
-	if space.Position.Y > targetSpace.Position.Y {
+	if space.Position.Y > (targetSpace.Position.Y + 5) {
 		space.Position.Y -= vel
+		done = false
 	}
+
+	if done {
+		var shadeLink *engi.LinkComponent
+		if !link.Entity.GetComponent(&shadeLink) {
+			return
+		}
+		if !shadeLink.Entity.Exists {
+			shadeLink.Entity.Exists = true
+		}
+	}
+
 }

@@ -87,7 +87,7 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	shade.AddComponent(&shadeSpace)
 
 	link := engi.LinkComponent{shade}
-	light.AddComponent(link)
+	light.AddComponent(&link)
 	return light, shade
 }
 
