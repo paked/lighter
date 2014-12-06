@@ -15,21 +15,25 @@ func (gai GuardAISystem) Name() string {
 
 func (gai *GuardAISystem) New() {
 	gai.System = &engi.System{}
+	engi.Mailbox.Listen("AttentionMessage", gai)
 }
 
 func (gai *GuardAISystem) Receive(message engi.Message) {
-	target, ok := message.(messages.TargetMessage)
+	switch message.(type) {
+	case messages.AttentionMessage:
+		attention := message.(messages.AttentionMessage)
+		for _, e := range gai.Entities() {
+			var link *engi.LinkComponent
+			if !e.GetComponent(&link) {
+				break
+			}
 
-	if !ok {
-		return
+			if link.Entity == nil {
+				link.Entity = attention.Entity
+				return
+			}
+		}
 	}
-
-	var link *engi.LinkComponent
-	if !target.Guard.GetComponent(&link) {
-		return
-	}
-
-	link.Entity = target.Entity
 }
 
 func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
@@ -40,6 +44,10 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 	)
 
 	if !e.GetComponent(&link) || !e.GetComponent(&space) {
+		return
+	}
+
+	if link.Entity == nil {
 		return
 	}
 
@@ -74,8 +82,10 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		if !link.Entity.GetComponent(&shadeLink) {
 			return
 		}
+
 		if !shadeLink.Entity.Exists {
 			shadeLink.Entity.Exists = true
+			link.Entity = nil
 		}
 	}
 

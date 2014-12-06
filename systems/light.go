@@ -2,7 +2,8 @@ package systems
 
 import (
 	"github.com/paked/engi"
-	// "github.com/paked/lighter/core"
+	"github.com/paked/lighter/messages"
+	// "log"
 )
 
 type LightSystem struct {
@@ -23,5 +24,15 @@ func (ls *LightSystem) Receive(message engi.Message) {
 }
 
 func (ls *LightSystem) Update(e *engi.Entity, dt float32) {
-	// log.Printf("%T", 0xffffff)
+	var (
+		link *engi.LinkComponent
+	)
+
+	if !e.GetComponent(&link) {
+		return
+	}
+
+	if !link.Entity.Exists {
+		engi.Mailbox.Dispatch(messages.AttentionMessage{e})
+	}
 }

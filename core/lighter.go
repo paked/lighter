@@ -36,9 +36,11 @@ func (l *Lighter) Setup() {
 			li, sh := NewLightAndShade(x*engi.Width()+64, y*engi.Height()+64)
 			l.AddEntity(li)
 			l.AddEntity(sh)
-			l.AddEntity(NewGuard(li))
 		}
+	}
 
+	for i := 0; i < 5; i++ {
+		l.AddEntity(NewGuard(nil))
 	}
 }
 
