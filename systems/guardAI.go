@@ -4,7 +4,7 @@ import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/messages"
-	"log"
+	// "log"
 	"math"
 	"math/rand"
 )
@@ -83,10 +83,11 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 	if !e.GetComponent(&speed) {
 		return
 	}
+	maxVel := 75 * dt
 	accel := 10 * dt
 	if link.Entity != nil {
 		if link.Entity.Pattern == "player" {
-			accel *= 1.2
+			maxVel *= 2
 		}
 	}
 
@@ -119,6 +120,23 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 
 	speed.X += speed.Acceleration.X
 	speed.Y += speed.Acceleration.Y
+
+	if speed.X > maxVel {
+		speed.X = maxVel
+	}
+
+	if speed.X < -maxVel {
+		speed.X = -maxVel
+	}
+
+	if speed.Y > maxVel {
+		speed.Y = maxVel
+	}
+
+	if speed.Y < -maxVel {
+		speed.Y = -maxVel
+	}
+
 	space.Position.X += speed.X
 	space.Position.Y += speed.Y
 	speed.X *= drag
@@ -148,7 +166,6 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 				shadeLink.Entity.Exists = true
 				gai.progress[link.Entity.ID()] = false
 				link.Entity = nil
-				log.Println("WOOHOO")
 			}
 			dc.Point = GenerateGuardPosition(point)
 		} else {
