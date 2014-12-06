@@ -3,7 +3,6 @@ package systems
 import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
-	// "log"
 )
 
 var CONTROL_SCHEME_WASD = "WASD"
