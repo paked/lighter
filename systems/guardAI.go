@@ -5,6 +5,7 @@ import (
 	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/messages"
 	"log"
+	"math"
 	"math/rand"
 )
 
@@ -80,16 +81,15 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 
 	vel := 50 * dt
 	done := true
+
 	if space.Position.X < (point.X - 5) {
 		space.Position.X += vel
 		done = false
-		// log.Println("RIGHT")
 	}
 
 	if space.Position.X > (point.X + 5) {
 		space.Position.X -= vel
 		done = false
-		// log.Println("LEFT")
 	}
 
 	if done {
@@ -131,13 +131,17 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 
 }
 
+func distanceBetween(one, two engi.Point) float64 {
+	return math.Sqrt(math.Pow(float64(one.X-two.X), 2) + math.Pow(float64(one.Y-two.Y), 2))
+}
+
 func GenerateGuardPosition(old engi.Point) engi.Point {
 	point := engi.Point{engi.Width() * rand.Float32(), engi.Height() * rand.Float32()}
-
-	if rand.Float32() > .5 {
-		point.X = old.X
-	} else {
-		point.Y = old.Y
-	}
+	// log.Println("NEW KEY")
+	// if rand.Float32() > .5 {
+	// 	point.X = old.X
+	// } else {
+	// 	point.Y = old.Y
+	// }
 	return point
 }
