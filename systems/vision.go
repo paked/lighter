@@ -32,7 +32,7 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 	}
 
 	for _, entity := range vs.Entities() {
-		if entity.ID() != e.ID() {
+		if entity.ID() != e.ID() && entity.Pattern == "player" {
 			var (
 				space  *engi.SpaceComponent
 				oSpace *engi.SpaceComponent
@@ -43,8 +43,27 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 			}
 
 			if isPointInCircle(oSpace.Position, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
-				// log.Println("Hey")
-				//Kill somewthing
+				var (
+					link  *engi.LinkComponent
+					oLink *engi.LinkComponent
+					anim  *engi.AnimationComponent
+				)
+
+				if !e.GetComponent(&link) {
+					break
+				}
+
+				if !link.Entity.GetComponent(&oLink) {
+					break
+				}
+
+				oLink.Entity = entity
+
+				if !e.GetComponent(&anim) {
+					break
+				}
+
+				anim.SelectAnimation("attack")
 			}
 
 		}

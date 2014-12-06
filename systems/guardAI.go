@@ -56,10 +56,10 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		link        *engi.LinkComponent
 		space       *engi.SpaceComponent
 		targetSpace *engi.SpaceComponent
-		vision      *components.VisionComponent
+		// vision      *components.VisionComponent
 	)
 
-	if !e.GetComponent(&link) || !e.GetComponent(&space) || !e.GetComponent(&vision) {
+	if !e.GetComponent(&link) || !e.GetComponent(&space) {
 		return
 	}
 
@@ -83,14 +83,12 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 	if space.Position.X < (point.X - 5) {
 		space.Position.X += vel
 		done = false
-		vision.Direction = LOOKING_RIGHT
 		// log.Println("RIGHT")
 	}
 
 	if space.Position.X > (point.X + 5) {
 		space.Position.X -= vel
 		done = false
-		vision.Direction = LOOKING_LEFT
 		// log.Println("LEFT")
 	}
 
@@ -98,13 +96,11 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 		if space.Position.Y < (point.Y - 5) {
 			space.Position.Y += vel
 			done = false
-			vision.Direction = LOOKING_DOWN
 		}
 
 		if space.Position.Y > (point.Y + 5) {
 			space.Position.Y -= vel
 			done = false
-			vision.Direction = LOOKING_UP
 		}
 	}
 
@@ -131,7 +127,6 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 			dc.Point = GenerateGuardPosition(point)
 
 		}
-
 	}
 
 }

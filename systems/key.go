@@ -35,12 +35,10 @@ func (ks KeySystem) Receive(message engi.Message) {
 		return
 	}
 	if cm.Entity.Pattern == "player" && cm.To.Pattern == "key" && !key.HasKey {
-		// log.Println(cm.Entity.Pattern, cm.To.Pattern)
 		link.Entity = cm.Entity
 		key.HasKey = true
 		log.Println("Now haz key")
 	}
-	// oKey.HasKey = true
 }
 
 func (ks *KeySystem) Update(e *engi.Entity, dt float32) {

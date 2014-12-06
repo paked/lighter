@@ -26,8 +26,9 @@ func (l *Lighter) Setup() {
 	rand.Seed(time.Now().UnixNano())
 	log.Println("Welcome to lighter, a game made by @paked_ for Ludum Dare 31")
 	l.AddSystem(&engi.RenderSystem{})
-	l.AddSystem(&systems.ControlSystem{})
 	l.AddSystem(&engi.CollisionSystem{})
+	l.AddSystem(&engi.AnimationSystem{})
+	l.AddSystem(&systems.ControlSystem{})
 	l.AddSystem(&systems.LightSystem{})
 	l.AddSystem(&systems.GuardAISystem{})
 	l.AddSystem(&systems.KeySystem{})
@@ -108,27 +109,37 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 }
 
 func NewGuardAndSite(target *engi.Entity) (*engi.Entity, *engi.Entity) {
-	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem", "VisionSystem"})
+	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem"})
 	guard.Pattern = "guard"
 	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
 	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	destination := components.DestinationComponent{}
 	link := engi.LinkComponent{target}
-	vision := components.VisionComponent{true, 0}
 	guard.AddComponent(&render)
 	guard.AddComponent(&space)
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
-	guard.AddComponent(&vision)
 
-	sight := engi.NewEntity([]string{"RenderSystem", "StickySystem"})
+	sight := engi.NewEntity([]string{"RenderSystem", "StickySystem", "AnimationSystem", "VisionSystem"})
 	sight.Pattern = "sight"
-	renderS := engi.NewRenderComponent(engi.Files.Image("sight"), engi.Point{2, 2}, "sight")
+	spritesheet := engi.NewSpritesheet("sight", 64)
+	renderS := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "sight")
 	spaceS := engi.SpaceComponent{Position: space.Position, Width: 64 * render.Scale.X, Height: 64 * render.Scale.Y}
 	linkS := engi.LinkComponent{guard}
+	vision := components.VisionComponent{true, 0}
+	animation := engi.NewAnimationComponent()
+	animation.Rate = .1
+	animation.S = spritesheet
+
+	animation.AddAnimation("default", []int{0})
+	animation.AddAnimation("attack", []int{0, 1, 2, 3, 2, 1, 0})
+	animation.SelectAnimation("default")
+
 	sight.AddComponent(&renderS)
 	sight.AddComponent(&spaceS)
 	sight.AddComponent(&linkS)
+	sight.AddComponent(animation)
+	sight.AddComponent(&vision)
 	return guard, sight
 }
 
