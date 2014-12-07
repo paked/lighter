@@ -36,14 +36,15 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 			var (
 				space  *engi.SpaceComponent
 				oSpace *engi.SpaceComponent
+				vuln   *components.VulnerableComponent
 			)
 
-			if !e.GetComponent(&space) || !entity.GetComponent(&oSpace) {
+			if !e.GetComponent(&space) || !entity.GetComponent(&oSpace) || !e.GetComponent(&vuln) {
 				return
 			}
 
 			if isPointInCircle(engi.Point{oSpace.Position.X + oSpace.Width/2, oSpace.Position.Y + oSpace.Height/2}, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
-				if !engi.Keys.SHIFT.Down() {
+				if !engi.Keys.SHIFT.Down() && vuln.Is {
 					var (
 						link  *engi.LinkComponent
 						oLink *engi.LinkComponent

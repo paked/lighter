@@ -41,6 +41,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.PuzzleSystem{})
 	l.AddSystem(&systems.GemSystem{})
 	l.AddSystem(&systems.ScoreSystem{})
+	l.AddSystem(&systems.ShadeSystem{})
 
 	w := int(engi.Height() / 32)
 	h := int(engi.Width() / 32)
@@ -98,12 +99,12 @@ func (l *Lighter) Setup() {
 	gameMap.AddComponent(&mapSpace)
 
 	l.AddEntity(gameMap)
-
-	l.AddEntity(NewPlayer())
+	p := NewPlayer()
+	l.AddEntity(p)
 
 	for x := float32(0); x < 1; x += .25 {
 		for y := float32(0); y < 1; y += .25 {
-			li, sh := NewLightAndShade(x*engi.Width()+64, y*engi.Height()+64)
+			li, sh := NewLightAndShade(x*engi.Width()+64, y*engi.Height()+64, p)
 			l.AddEntity(li)
 			l.AddEntity(sh)
 		}
@@ -148,6 +149,7 @@ func NewPlayer() *engi.Entity {
 	speed := components.SpeedComponent{}
 	collision := engi.CollisionComponent{Main: true, Extra: engi.Point{}, Solid: true}
 	key := components.KeyComponent{}
+	v := components.VulnerableComponent{}
 
 	animation := engi.NewAnimationComponent()
 	animation.Rate = .2
@@ -167,11 +169,12 @@ func NewPlayer() *engi.Entity {
 	player.AddComponent(&collision)
 	player.AddComponent(&key)
 	player.AddComponent(animation)
+	player.AddComponent(&v)
 
 	return player
 }
 
-func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
+func NewLightAndShade(x, y float32, p *engi.Entity) (*engi.Entity, *engi.Entity) {
 	light := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "LightSystem"})
 	light.Pattern = "light"
 	render := engi.NewRenderComponent(engi.Files.Image("lightsource"), engi.Point{2, 2}, "light")
@@ -191,14 +194,16 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 	light.AddComponent(&space)
 	light.AddComponent(&collision)
 
-	shade := engi.NewEntity([]string{"RenderSystem"})
+	shade := engi.NewEntity([]string{"RenderSystem", "ShadeSystem"})
 	shade.Pattern = "shade"
 	texture := engi.Files.Image("shade")
 	shadeRender := engi.NewRenderComponent(texture, engi.Point{1, 1}, "shade")
 	shadeSpace := engi.SpaceComponent{Position: engi.Point{(space.Position.X + space.Width/2) - (texture.Width() / 2), (space.Position.Y + space.Height/2) - (texture.Height() / 2)}, Width: texture.Width(), Height: texture.Height()}
+	shadeLink := engi.LinkComponent{p}
 	shade.Exists = false
 	shade.AddComponent(&shadeRender)
 	shade.AddComponent(&shadeSpace)
+	shade.AddComponent(&shadeLink)
 
 	link := engi.LinkComponent{shade}
 	light.AddComponent(&link)
