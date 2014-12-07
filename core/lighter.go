@@ -4,7 +4,6 @@ import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
 	"github.com/paked/lighter/systems"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -22,12 +21,12 @@ func (l Lighter) Preload() {
 	engi.Files.Add("sight", "assets/sight.png")
 	engi.Files.Add("tileset", "assets/tileset.png")
 	engi.Files.Add("playersheet", "assets/Hero.png")
+	engi.Files.Add("arrows", "assets/arrows.png")
 	engi.Files.Add("enemysheet", "assets/enemysheet.png")
 }
 
 func (l *Lighter) Setup() {
 	rand.Seed(time.Now().UnixNano())
-	log.Println("Welcome to lighter, a game made by @paked_ for Ludum Dare 31")
 	l.AddSystem(&systems.KeySystem{})
 	l.AddSystem(&engi.RenderSystem{})
 	l.AddSystem(&engi.CollisionSystem{})
@@ -37,6 +36,8 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.GuardAISystem{})
 	l.AddSystem(&systems.VisionSystem{})
 	l.AddSystem(&systems.StickySystem{})
+	l.AddSystem(&systems.PuzzleSystem{})
+
 	w := int(engi.Height() / 32)
 	h := int(engi.Width() / 32)
 	array := make([][]string, w)
@@ -110,9 +111,22 @@ func (l *Lighter) Setup() {
 		l.AddEntity(s)
 	}
 
-	l.AddEntity(NewKey())
-}
+	// l.AddEntity(NewKey())
 
+	l.AddEntity(NewPuzzle())
+}
+func NewPuzzle() *engi.Entity {
+	p := engi.NewEntity([]string{"RenderSystem", "PuzzleSystem"})
+	render := engi.NewRenderComponent(nil, engi.Point{2, 2}, "puzzle")
+	space := engi.SpaceComponent{Position: engi.Point{400 - 32, 400 - 32}, Width: 32, Height: 32}
+	puzzle := components.PuzzleComponent{}
+
+	p.AddComponent(&render)
+	p.AddComponent(&space)
+	p.AddComponent(&puzzle)
+
+	return p
+}
 func NewPlayer() *engi.Entity {
 	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "VisionSystem", "AnimationSystem"})
 	player.Pattern = "player"
@@ -133,7 +147,6 @@ func NewPlayer() *engi.Entity {
 	animation.AddAnimation("down", []int{4, 5, 6, 7})
 	animation.AddAnimation("left", []int{8, 9, 10, 11})
 	animation.AddAnimation("right", []int{8, 9, 10, 11})
-	// animation.AddAnimation("attack", []int{0, 1, 2, 3, 2, 1, 0})
 	animation.SelectAnimation("default")
 
 	player.AddComponent(&render)
@@ -237,12 +250,10 @@ func NewKey() *engi.Entity {
 	space := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	link := engi.LinkComponent{}
 	collision := engi.CollisionComponent{}
-	// keyC := components.KeyComponent{}
 
 	key.AddComponent(&render)
 	key.AddComponent(&space)
 	key.AddComponent(&link)
-	// key.AddComponent(&keyC)
 	key.AddComponent(&collision)
 	return key
 }

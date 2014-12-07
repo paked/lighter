@@ -3,6 +3,7 @@ package systems
 import (
 	"github.com/paked/engi"
 	"github.com/paked/lighter/components"
+	"github.com/paked/lighter/messages"
 )
 
 var CONTROL_SCHEME_WASD = "WASD"
@@ -88,5 +89,9 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 
 	if speed.Y <= 1 && speed.Y >= -1 {
 		speed.Y = 0
+	}
+
+	if engi.Keys.KEY_CONTROL.JustPressed() {
+		engi.Mailbox.Dispatch(messages.DisplayPuzzle{})
 	}
 }

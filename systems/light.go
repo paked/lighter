@@ -42,27 +42,6 @@ func (ls *LightSystem) Receive(message engi.Message) {
 				}
 			}
 		}
-
-		// if cm.Entity.Pattern == "player" && cm.To.Pattern == "key" {
-		// 	if !key.HasKey {
-		// 		var keySpace *engi.SpaceComponent
-		// 		if !cm.To.GetComponent(&keySpace) {
-		// 			return
-		// 		}
-		// 		key.Cooldown = 100
-		// 		keySpace.Position.X = 150
-		// 		keySpace.Position.Y = 150
-		// 		log.Println("MOVED KEY")
-		// 		key.HasKey = false
-
-		// 		var link *engi.LinkComponent
-		// 		if !cm.To.GetComponent(&link) {
-		// 			return
-		// 		}
-
-		// 		link.Entity = nil
-		// 	}
-		// }
 	}
 }
 
