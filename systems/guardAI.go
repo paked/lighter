@@ -94,18 +94,21 @@ func (gai *GuardAISystem) Update(e *engi.Entity, dt float32) {
 
 	drag := float32(.4)
 	done := true
-
 	if space.Position.X < (point.X - 5) {
-		// speed.Acceleration.Y = 0
 		speed.Acceleration.X += accel
 		done = false
 		animation.SelectAnimation("right")
+
 	}
 
 	if space.Position.X > (point.X + 5) {
 		speed.Acceleration.X -= accel
 		animation.SelectAnimation("left")
 		done = false
+	}
+
+	if !done {
+		speed.Acceleration.Y = 0
 	}
 
 	if done {

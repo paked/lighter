@@ -42,7 +42,7 @@ func (vs *VisionSystem) Update(e *engi.Entity, dt float32) {
 				return
 			}
 
-			if isPointInCircle(oSpace.Position, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
+			if isPointInCircle(engi.Point{oSpace.Position.X + oSpace.Width/2, oSpace.Position.Y + oSpace.Height/2}, engi.Point{space.Position.X + space.Width/2, space.Position.Y + space.Height/2}, 64) {
 				var (
 					link  *engi.LinkComponent
 					oLink *engi.LinkComponent
