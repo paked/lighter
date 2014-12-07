@@ -20,20 +20,79 @@ func (l Lighter) Preload() {
 	engi.Files.Add("guard", "assets/enemy.png")
 	engi.Files.Add("key", "assets/key.png")
 	engi.Files.Add("sight", "assets/sight.png")
+	engi.Files.Add("tileset", "assets/tileset.png")
+	engi.Files.Add("playersheet", "assets/Hero.png")
+	engi.Files.Add("enemysheet", "assets/enemysheet.png")
 }
 
 func (l *Lighter) Setup() {
 	rand.Seed(time.Now().UnixNano())
 	log.Println("Welcome to lighter, a game made by @paked_ for Ludum Dare 31")
+	l.AddSystem(&systems.KeySystem{})
 	l.AddSystem(&engi.RenderSystem{})
 	l.AddSystem(&engi.CollisionSystem{})
 	l.AddSystem(&engi.AnimationSystem{})
 	l.AddSystem(&systems.ControlSystem{})
 	l.AddSystem(&systems.LightSystem{})
 	l.AddSystem(&systems.GuardAISystem{})
-	l.AddSystem(&systems.KeySystem{})
 	l.AddSystem(&systems.VisionSystem{})
 	l.AddSystem(&systems.StickySystem{})
+	w := int(engi.Height() / 32)
+	h := int(engi.Width() / 32)
+	array := make([][]string, w)
+	for i := range array {
+		array[i] = make([]string, h)
+	}
+
+	gameMap := engi.NewEntity([]string{"RenderSystem"})
+	for y := 0; y < w; y++ {
+		for x := 0; x < h; x++ {
+			tile := "1"
+
+			if rand.Float32() > .99 {
+				tile = "2"
+			}
+
+			if rand.Float32() > .95 {
+				tile = "3"
+			}
+
+			if rand.Float32() > .95 {
+				tile = "4"
+			}
+
+			if y == 0 {
+				tile = "5"
+			}
+
+			if x == 0 {
+				tile = "6"
+			}
+
+			if x == (w - 1) {
+				tile = "7"
+			}
+
+			if x == 0 && y == 0 {
+				tile = "8"
+			}
+
+			if x == (w-1) && y == 0 {
+				tile = "9"
+			}
+
+			array[y][x] = tile
+
+		}
+	}
+
+	tilemap := engi.NewTilemap(array, engi.Files.Image("tileset"))
+	mapRender := engi.NewRenderComponent(tilemap, engi.Point{2, 2}, "map")
+	mapSpace := engi.SpaceComponent{engi.Point{0, 0}, 0, 0}
+	gameMap.AddComponent(&mapRender)
+	gameMap.AddComponent(&mapSpace)
+
+	l.AddEntity(gameMap)
 
 	l.AddEntity(NewPlayer())
 
@@ -55,14 +114,27 @@ func (l *Lighter) Setup() {
 }
 
 func NewPlayer() *engi.Entity {
-	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "VisionSystem"})
+	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "VisionSystem", "AnimationSystem"})
 	player.Pattern = "player"
-	render := engi.NewRenderComponent(engi.Files.Image("player"), engi.Point{2, 2}, "player")
+	spritesheet := engi.NewSpritesheet("playersheet", 16)
+	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "player")
 	space := engi.SpaceComponent{Position: engi.Point{400, 400}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	control := components.ControlComponent{Scheme: systems.CONTROL_SCHEME_WASD}
 	speed := components.SpeedComponent{}
 	collision := engi.CollisionComponent{Main: true, Extra: engi.Point{}, Solid: true}
 	key := components.KeyComponent{}
+
+	animation := engi.NewAnimationComponent()
+	animation.Rate = .2
+	animation.S = spritesheet
+
+	animation.AddAnimation("default", []int{4})
+	animation.AddAnimation("up", []int{0, 1, 2, 3})
+	animation.AddAnimation("down", []int{4, 5, 6, 7})
+	animation.AddAnimation("left", []int{8, 9, 10, 11})
+	animation.AddAnimation("right", []int{8, 9, 10, 11})
+	// animation.AddAnimation("attack", []int{0, 1, 2, 3, 2, 1, 0})
+	animation.SelectAnimation("default")
 
 	player.AddComponent(&render)
 	player.AddComponent(&space)
@@ -70,6 +142,7 @@ func NewPlayer() *engi.Entity {
 	player.AddComponent(&speed)
 	player.AddComponent(&collision)
 	player.AddComponent(&key)
+	player.AddComponent(animation)
 
 	return player
 }
@@ -109,17 +182,30 @@ func NewLightAndShade(x, y float32) (*engi.Entity, *engi.Entity) {
 }
 
 func NewGuardAndSite(target *engi.Entity) (*engi.Entity, *engi.Entity) {
-	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem"})
+	guard := engi.NewEntity([]string{"RenderSystem", "GuardAISystem", "AnimationSystem"})
 	guard.Pattern = "guard"
-	render := engi.NewRenderComponent(engi.Files.Image("guard"), engi.Point{2, 2}, "guard")
+	s := engi.NewSpritesheet("enemysheet", 16)
+	render := engi.NewRenderComponent(s.Cell(0), engi.Point{2, 2}, "guard")
 	space := engi.SpaceComponent{Position: engi.Point{engi.Width() * rand.Float32(), 100}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	destination := components.DestinationComponent{}
 	link := engi.LinkComponent{target}
+	animation := engi.NewAnimationComponent()
+	animation.Rate = .2
+	animation.S = s
+
+	animation.AddAnimation("default", []int{0})
+	animation.AddAnimation("down", []int{0, 1})
+	animation.AddAnimation("left", []int{2, 3})
+	animation.AddAnimation("right", []int{4, 5})
+	animation.AddAnimation("up", []int{6, 7})
+	animation.SelectAnimation("default")
+
 	guard.AddComponent(&render)
 	guard.AddComponent(&space)
 	guard.AddComponent(&link)
 	guard.AddComponent(&destination)
 	guard.AddComponent(&components.SpeedComponent{})
+	guard.AddComponent(animation)
 
 	sight := engi.NewEntity([]string{"RenderSystem", "StickySystem", "AnimationSystem", "VisionSystem"})
 	sight.Pattern = "sight"
@@ -128,18 +214,18 @@ func NewGuardAndSite(target *engi.Entity) (*engi.Entity, *engi.Entity) {
 	spaceS := engi.SpaceComponent{Position: space.Position, Width: 64 * render.Scale.X, Height: 64 * render.Scale.Y}
 	linkS := engi.LinkComponent{guard}
 	vision := components.VisionComponent{true, 0}
-	animation := engi.NewAnimationComponent()
-	animation.Rate = .1
-	animation.S = spritesheet
+	animationS := engi.NewAnimationComponent()
+	animationS.Rate = .1
+	animationS.S = spritesheet
 
-	animation.AddAnimation("default", []int{0})
-	animation.AddAnimation("attack", []int{0, 1, 2, 3, 2, 1, 0})
-	animation.SelectAnimation("default")
+	animationS.AddAnimation("default", []int{4})
+	animationS.AddAnimation("attack", []int{0, 1, 2, 3, 2, 1, 0})
+	animationS.SelectAnimation("default")
 
 	sight.AddComponent(&renderS)
 	sight.AddComponent(&spaceS)
 	sight.AddComponent(&linkS)
-	sight.AddComponent(animation)
+	sight.AddComponent(animationS)
 	sight.AddComponent(&vision)
 	return guard, sight
 }

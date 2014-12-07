@@ -35,6 +35,9 @@ func (ks KeySystem) Receive(message engi.Message) {
 		return
 	}
 	if cm.Entity.Pattern == "player" && cm.To.Pattern == "key" && !key.HasKey {
+		if key.Cooldown != 0 {
+			return
+		}
 		link.Entity = cm.Entity
 		key.HasKey = true
 		log.Println("Now haz key")
@@ -46,7 +49,18 @@ func (ks *KeySystem) Update(e *engi.Entity, dt float32) {
 		link       *engi.LinkComponent
 		space      *engi.SpaceComponent
 		otherSpace *engi.SpaceComponent
+		key        *components.KeyComponent
+		mKey       *components.KeyComponent
 	)
+
+	if !e.GetComponent(&mKey) {
+		return
+	}
+
+	// if mKey.Cooldown != 0 {
+	// 	mKey.Cooldown -= 1
+	// 	return
+	// }
 
 	if !e.GetComponent(&link) || !e.GetComponent(&space) {
 		return
@@ -59,9 +73,17 @@ func (ks *KeySystem) Update(e *engi.Entity, dt float32) {
 	if !link.Entity.GetComponent(&otherSpace) {
 		return
 	}
-
-	space.Position = otherSpace.Position
-	space.Position.X += space.Width - 8
-	space.Position.Y += space.Height / 2
+	// log.Println("GETTING KEY")
+	if !link.Entity.GetComponent(&key) {
+		return
+	}
+	// log.Println("GOT KEY")
+	// log.Println(link.Entity.Pattern, e.Pattern)
+	if key.HasKey {
+		// log.Println("MOVIUNG KEY")
+		space.Position = otherSpace.Position
+		space.Position.X += space.Width - 8
+		space.Position.Y += space.Height / 2
+	}
 
 }

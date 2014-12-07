@@ -24,7 +24,8 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	var controls *components.ControlComponent
 	var speed *components.SpeedComponent
 	var space *engi.SpaceComponent
-	if !entity.GetComponent(&controls) || !entity.GetComponent(&speed) || !entity.GetComponent(&space) {
+	var animation *engi.AnimationComponent
+	if !entity.GetComponent(&controls) || !entity.GetComponent(&speed) || !entity.GetComponent(&space) || !entity.GetComponent(&animation) {
 		return
 	}
 
@@ -54,18 +55,22 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	speed.Acceleration = engi.Point{}
 	if up {
 		speed.Acceleration.Y -= accel
+		animation.SelectAnimation("up")
 	}
 
 	if down {
 		speed.Acceleration.Y += accel
+		animation.SelectAnimation("down")
 	}
 
 	if left {
 		speed.Acceleration.X += accel
+		animation.SelectAnimation("left")
 	}
 
 	if right {
 		speed.Acceleration.X -= accel
+		animation.SelectAnimation("right")
 	}
 
 	speed.X += speed.Acceleration.X
