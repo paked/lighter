@@ -18,6 +18,7 @@ func (l Lighter) Preload() {
 	engi.Files.Add("shade", "assets/shade.png")
 	engi.Files.Add("guard", "assets/enemy.png")
 	engi.Files.Add("key", "assets/key.png")
+	engi.Files.Add("gem", "assets/gem.png")
 	engi.Files.Add("sight", "assets/sight.png")
 	engi.Files.Add("tileset", "assets/tileset.png")
 	engi.Files.Add("playersheet", "assets/Hero.png")
@@ -37,6 +38,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.VisionSystem{})
 	l.AddSystem(&systems.StickySystem{})
 	l.AddSystem(&systems.PuzzleSystem{})
+	l.AddSystem(&systems.GemSystem{})
 
 	w := int(engi.Height() / 32)
 	h := int(engi.Width() / 32)
@@ -110,8 +112,6 @@ func (l *Lighter) Setup() {
 		l.AddEntity(g)
 		l.AddEntity(s)
 	}
-
-	// l.AddEntity(NewKey())
 
 	l.AddEntity(NewPuzzle())
 }
