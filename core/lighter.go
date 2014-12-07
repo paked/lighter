@@ -18,6 +18,7 @@ func (l Lighter) Preload() {
 	engi.Files.Add("shade", "assets/shade.png")
 	engi.Files.Add("guard", "assets/enemy.png")
 	engi.Files.Add("key", "assets/key.png")
+	engi.Files.Add("font", "assets/font.png")
 	engi.Files.Add("gem", "assets/gem.png")
 	engi.Files.Add("sight", "assets/sight.png")
 	engi.Files.Add("tileset", "assets/tileset.png")
@@ -39,6 +40,7 @@ func (l *Lighter) Setup() {
 	l.AddSystem(&systems.StickySystem{})
 	l.AddSystem(&systems.PuzzleSystem{})
 	l.AddSystem(&systems.GemSystem{})
+	l.AddSystem(&systems.ScoreSystem{})
 
 	w := int(engi.Height() / 32)
 	h := int(engi.Width() / 32)
@@ -112,6 +114,15 @@ func (l *Lighter) Setup() {
 		l.AddEntity(g)
 		l.AddEntity(s)
 	}
+
+	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
+	t := engi.NewText("1 Point", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
+	r := engi.NewRenderComponent(t, engi.Point{1, 1}, "score")
+	s := engi.SpaceComponent{engi.Point{100, 100}, t.Width(), t.Height()}
+
+	score.AddComponent(&r)
+	score.AddComponent(&s)
+	l.AddEntity(score)
 
 	l.AddEntity(NewPuzzle())
 }
