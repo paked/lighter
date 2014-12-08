@@ -142,7 +142,7 @@ func NewPuzzle() *engi.Entity {
 func NewPlayer() *engi.Entity {
 	player := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "VisionSystem", "AnimationSystem"})
 	player.Pattern = "player"
-	spritesheet := engi.NewSpritesheet("playersheet", 16)
+	spritesheet := engi.NewSpritesheet("player", 16)
 	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "player")
 	space := engi.SpaceComponent{Position: engi.Point{400, 400}, Width: 16 * render.Scale.X, Height: 16 * render.Scale.Y}
 	control := components.ControlComponent{Scheme: systems.CONTROL_SCHEME_WASD}
@@ -152,14 +152,14 @@ func NewPlayer() *engi.Entity {
 	v := components.VulnerableComponent{}
 
 	animation := engi.NewAnimationComponent()
-	animation.Rate = .2
+	animation.Rate = 1
 	animation.S = spritesheet
 
-	animation.AddAnimation("default", []int{4})
-	animation.AddAnimation("up", []int{0, 1, 2, 3})
-	animation.AddAnimation("down", []int{4, 5, 6, 7})
-	animation.AddAnimation("left", []int{8, 9, 10, 11})
-	animation.AddAnimation("right", []int{8, 9, 10, 11})
+	animation.AddAnimation("default", []int{0})
+	animation.AddAnimation("up", []int{0})
+	animation.AddAnimation("down", []int{0})
+	animation.AddAnimation("left", []int{0})
+	animation.AddAnimation("right", []int{0})
 	animation.SelectAnimation("default")
 
 	player.AddComponent(&render)

@@ -27,6 +27,8 @@ func (gai *GuardAISystem) New() {
 	gai.System = &engi.System{}
 	gai.progress = make(map[string]bool)
 	engi.Mailbox.Listen("AttentionMessage", gai)
+	engi.Mailbox.Listen("CollisionMessage", gai)
+	engi.Mailbox.Listen("GameOverMessage", gai)
 }
 
 func (gai *GuardAISystem) Receive(message engi.Message) {
@@ -49,6 +51,31 @@ func (gai *GuardAISystem) Receive(message engi.Message) {
 				return
 			}
 		}
+	case engi.CollisionMessage:
+		cm := message.(engi.CollisionMessage)
+		if cm.Entity.Pattern == "player" && cm.To.Pattern == "guard" {
+			engi.Mailbox.Dispatch(messages.GameOverMessage{})
+			score := engi.NewEntity([]string{"RenderSystem"})
+			t := engi.NewText("Game Over", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
+			r := engi.NewRenderComponent(t, engi.Point{1, 1}, "score")
+			s := engi.SpaceComponent{engi.Point{100, 100}, t.Width(), t.Height()}
+
+			score.AddComponent(&r)
+			score.AddComponent(&s)
+			engi.Wo.AddEntity(score)
+			println("GAME OVER")
+		}
+
+	case messages.GameOverMessage:
+		score := engi.NewEntity([]string{"RenderSystem"})
+		t := engi.NewText("Game Over", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
+		r := engi.NewRenderComponent(t, engi.Point{1, 1}, "score")
+		s := engi.SpaceComponent{engi.Point{100, 100}, t.Width(), t.Height()}
+
+		score.AddComponent(&r)
+		score.AddComponent(&s)
+		engi.Wo.AddEntity(score)
+		println("GAME OVER")
 	}
 }
 
